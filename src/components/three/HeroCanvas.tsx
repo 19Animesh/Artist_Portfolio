@@ -1,0 +1,59 @@
+"use client";
+
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Points, PointMaterial } from "@react-three/drei";
+import { useState, useRef, Suspense } from "react";
+import * as THREE from "three";
+
+function ParticleField() {
+  const ref = useRef<THREE.Points>(null);
+  const [sphere] = useState(() => {
+    const points = new Float32Array(3000 * 3);
+    for (let i = 0; i < points.length; i += 3) {
+      const radius = 2.5 + Math.random() * 2;
+      const theta = 2 * Math.PI * Math.random();
+      const phi = Math.acos(2 * Math.random() - 1);
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.sin(phi) * Math.sin(theta);
+      const z = radius * Math.cos(phi);
+      points[i] = x;
+      points[i + 1] = y;
+      points[i + 2] = z;
+    }
+    return points;
+  });
+
+  useFrame((state, delta) => {
+    if (ref.current) {
+      ref.current.rotation.x -= delta / 10;
+      ref.current.rotation.y -= delta / 15;
+    }
+  });
+
+  return (
+    <group rotation={[0, 0, Math.PI / 4]}>
+      <Points ref={ref} positions={sphere} stride={3} frustumCulled={false}>
+        <PointMaterial
+          transparent
+          color="#d4af37" /* Gold */
+          size={0.015}
+          sizeAttenuation={true}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </Points>
+    </group>
+  );
+}
+
+export function HeroCanvas() {
+  return (
+    <div className="absolute inset-0 z-0 opacity-40">
+      <Canvas camera={{ position: [0, 0, 4] }}>
+        <Suspense fallback={null}>
+          <ParticleField />
+        </Suspense>
+      </Canvas>
+    </div>
+  );
+}
