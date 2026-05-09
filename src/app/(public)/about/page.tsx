@@ -16,10 +16,10 @@ export default function AboutPage() {
           {/* Portrait */}
           <div className="md:w-1/2">
             <ScrollReveal>
-              <div className="relative w-full aspect-[3/4] border border-[var(--color-gold-900)] p-3">
+              <div className="relative w-full aspect-[9/16] border border-[var(--color-gold-900)] p-3">
                 <div className="w-full h-full relative overflow-hidden bg-[var(--color-gold-950)]/30">
                   <Image
-                    src="/placeholder-1.png"
+                    src="https://res.cloudinary.com/dufyqm2f2/image/upload/c_fill,g_north,ar_9:16/Gemini_Generated_Image_xb98ntxb98ntxb98_hl8i8l"
                     alt="Anshika Agarwal — Artist Portrait"
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"

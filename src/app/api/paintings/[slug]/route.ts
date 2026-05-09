@@ -1,18 +1,12 @@
 import { NextResponse } from "next/server";
-import connectToDatabase from "@/lib/mongodb";
-import Painting from "@/models/Painting";
+import cloudinary from "@/lib/cloudinary";
+import { getPaintingBySlug } from "@/lib/paintings";
 import { auth } from "@/lib/auth";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params;
-    await connectToDatabase();
-    
-    // Check if slug is a Mongo ID or a string slug
-    const isObjectId = slug.match(/^[0-9a-fA-F]{24}$/);
-    const query = isObjectId ? { _id: slug } : { slug };
-
-    const painting = await Painting.findOne(query);
+    const painting = await getPaintingBySlug(slug);
 
     if (!painting) {
       return NextResponse.json({ error: "Painting not found" }, { status: 404 });
@@ -33,19 +27,37 @@ export async function PUT(req: Request, { params }: { params: Promise<{ slug: st
     }
 
     const { slug } = await params;
-    await connectToDatabase();
-    const body = await req.json();
+    const existingPainting = await getPaintingBySlug(slug);
 
-    const isObjectId = slug.match(/^[0-9a-fA-F]{24}$/);
-    const query = isObjectId ? { _id: slug } : { slug };
-
-    const updatedPainting = await Painting.findOneAndUpdate(query, body, { new: true });
-
-    if (!updatedPainting) {
+    if (!existingPainting) {
       return NextResponse.json({ error: "Painting not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ painting: updatedPainting }, { status: 200 });
+    const body = await req.json();
+    const { title, medium, category, year, dimensions, description, isFeatured, order } = body;
+
+    // Use the existing slug so links don't break unless explicitly changed.
+    // If we want to allow slug changes, we'd take body.slug.
+    const updatedSlug = body.slug || slug;
+
+    const contextMap = [
+      title && `title=${encodeURIComponent(title)}`,
+      updatedSlug && `slug=${encodeURIComponent(updatedSlug)}`,
+      medium && `medium=${encodeURIComponent(medium)}`,
+      category && `category=${encodeURIComponent(category)}`,
+      year && `year=${year}`,
+      dimensions && `size=${encodeURIComponent(dimensions)}`,
+      description && `shortDescription=${encodeURIComponent(description)}`,
+      typeof isFeatured === 'boolean' && `featured=${isFeatured}`,
+      order !== undefined && `order=${order}`
+    ].filter(Boolean).join('|');
+
+    await cloudinary.uploader.explicit(existingPainting.publicId, {
+      type: "upload",
+      context: contextMap,
+    });
+
+    return NextResponse.json({ message: "Painting updated" }, { status: 200 });
   } catch (error) {
     console.error("Error updating painting", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -60,16 +72,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ slug:
     }
 
     const { slug } = await params;
-    await connectToDatabase();
+    const existingPainting = await getPaintingBySlug(slug);
 
-    const isObjectId = slug.match(/^[0-9a-fA-F]{24}$/);
-    const query = isObjectId ? { _id: slug } : { slug };
-
-    const deletedPainting = await Painting.findOneAndDelete(query);
-
-    if (!deletedPainting) {
+    if (!existingPainting) {
       return NextResponse.json({ error: "Painting not found" }, { status: 404 });
     }
+
+    await cloudinary.uploader.destroy(existingPainting.publicId);
 
     return NextResponse.json({ message: "Painting deleted successfully" }, { status: 200 });
   } catch (error) {

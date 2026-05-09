@@ -10,10 +10,11 @@ interface PaintingRevealProps {
   width?: number;
   height?: number;
   className?: string;
+  imageClassName?: string;
   priority?: boolean;
 }
 
-export function PaintingReveal({ src, alt, width = 800, height = 1000, className = "", priority = false }: PaintingRevealProps) {
+export function PaintingReveal({ src, alt, width = 800, height = 1000, className = "", imageClassName = "object-cover", priority = false }: PaintingRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-20%" });
   const [isHovered, setIsHovered] = useState(false);
@@ -33,8 +34,8 @@ export function PaintingReveal({ src, alt, width = 800, height = 1000, className
       onMouseLeave={() => setIsHovered(false)}
     >
       <motion.div
-        initial={{ y: "100%" }}
-        animate={isInView ? { y: "0%" } : { y: "100%" }}
+        initial={{ y: "0%" }}
+        animate={isInView ? { y: "100%" } : { y: "0%" }}
         transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }} /* Custom cubic-bezier for a dramatic fluid reveal */
         className="w-full h-full absolute inset-0 bg-[var(--background)] z-10 origin-bottom"
         style={{ pointerEvents: 'none' }}
@@ -52,9 +53,9 @@ export function PaintingReveal({ src, alt, width = 800, height = 1000, className
             alt={alt}
             width={width}
             height={height}
-            className="w-full h-full object-cover filter transition-all duration-700"
+            className={`w-full h-full filter transition-all duration-700 opacity-90 ${imageClassName}`}
             style={{ 
-              filter: isHovered ? 'brightness(1.1) contrast(1.05)' : 'brightness(1)',
+              filter: isHovered ? 'sepia(10%) brightness(95%) contrast(105%)' : 'sepia(30%) brightness(75%) contrast(110%)',
             }}
             priority={priority}
           />

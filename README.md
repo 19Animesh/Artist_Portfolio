@@ -1,161 +1,98 @@
-# Anshika Agarwal — Artist Portfolio
+# Anshika Agarwal - Artist Portfolio
 
-A high-performance, immersive digital exhibition website for abstract and mixed media artist **Anshika Agarwal**. Built with Next.js 16, React 19, and Tailwind CSS v4, this portfolio doubles as an admin-managed art gallery with Cloudinary-powered image hosting and MongoDB persistence.
+A minimalist, high-performance digital portfolio for abstract mixed media artist Anshika Agarwal.
 
----
+## Project Overview
 
-## ✨ Features
+This website serves purely as a digital portfolio and gallery. Its primary purpose is to showcase artwork, highlight featured pieces, and provide direct contact information for inquiries and commissions. 
 
-- **Immersive Hero** — Three.js canvas animation with a custom painting-reveal interaction
-- **Gallery** — Filterable, masonry-style grid of artworks fetched from MongoDB + served via Cloudinary CDN
-- **About Page** — Artist biography, studio statistics, and portrait reveal
-- **Contact Page** — Validated contact form (React Hook Form + Zod) that writes to MongoDB
-- **Admin Panel** — Protected dashboard (`/admin`) for managing artworks and reading contact messages
-  - Add / Edit / Delete paintings with Cloudinary image upload
-  - Login protected via NextAuth v5 (JWT strategy, credentials provider)
-- **Custom Cursor** — Magnetic canvas cursor with blend-mode effects
-- **Loading Screen** — Animated intro sequence on first visit
-- **SEO** — Dynamic `sitemap.ts`, `robots.ts`, JSON-LD structured data, Open Graph meta tags
-- **Dark Art Direction** — Stone-950 base with a handcrafted gold colour palette, Playfair Display serif headers, Inter sans body
+## Tech Stack
 
----
+- **Framework:** Next.js 16 (App Router)
+- **UI Library:** React 19
+- **Styling:** Tailwind CSS v4
+- **Animations:** Framer Motion & GSAP
+- **3D Canvas (Hero):** React Three Fiber / Drei
+- **Data & Storage:** Cloudinary (CMS + Image Hosting)
 
-## 🗂 Project Structure
+## Cloudinary-Only Architecture
+
+This project was intentionally simplified to remove the need for a database. **MongoDB has been fully removed** because an art portfolio currently does not require complex relational data or user tracking. 
+
+Instead, the site uses Cloudinary as a lightweight, headless CMS:
+1. **Artwork Images:** Uploaded to the `artist_portfolio` folder.
+2. **Artwork Metadata:** Data like title, medium, year, dimensions, and descriptions are stored directly within each image asset using **Cloudinary Context Tags**.
+3. **Data Fetching:** The Next.js frontend calls the Cloudinary Admin API to fetch the folder's assets and reads their context metadata to render the gallery dynamically.
+
+## Folder Structure
 
 ```
 src/
-├── app/
-│   ├── (public)/           # Public-facing routes (layout with Navbar + Footer)
-│   │   ├── page.tsx        # Homepage — Hero, quote, featured works
-│   │   ├── about/          # About the artist
-│   │   ├── gallery/        # Full gallery grid + individual painting pages
-│   │   └── contact/        # Contact form page
-│   ├── admin/              # Protected admin panel (NextAuth guard via middleware)
-│   │   ├── layout.tsx      # Admin sidebar layout
-│   │   ├── page.tsx        # Dashboard — artworks list + recent messages
-│   │   ├── login/          # Login form
-│   │   └── paintings/      # new / [id]/edit
-│   ├── api/
-│   │   ├── paintings/      # GET all, GET by slug, POST, PATCH, DELETE
-│   │   ├── upload/         # Cloudinary signed-upload route
-│   │   └── contact/        # POST — saves contact message to DB
-│   ├── error.tsx           # Global error boundary
-│   ├── not-found.tsx       # 404 page
-│   ├── robots.ts           # SEO robots rules
-│   └── sitemap.ts          # Dynamic XML sitemap (includes gallery slugs)
-├── components/
-│   ├── animations/         # PageTransition, ScrollReveal, PaintingReveal, MagneticButton
-│   ├── gallery/            # GalleryGrid, PaintingCard, FilterBar
-│   ├── layout/             # Navbar, Footer, CustomCursor, LoadingScreen
-│   ├── shared/             # ContactForm
-│   └── three/              # HeroCanvas (React Three Fiber)
-├── lib/
-│   ├── auth.ts             # NextAuth v5 config (Credentials provider)
-│   ├── cloudinary.ts       # Cloudinary v2 SDK config
-│   ├── mongodb.ts          # Mongoose connection with connection caching
-│   └── utils.ts            # Shared utility helpers
-├── models/
-│   ├── Painting.ts         # Mongoose schema — title, slug, image, category, medium, year
-│   └── ContactMessage.ts   # Mongoose schema — name, email, message, read flag
-└── middleware.ts            # NextAuth edge middleware — guards /admin/* routes
+├── app/                  # Next.js App Router pages and API routes
+│   ├── (public)/         # Public-facing pages (Home, Gallery, Contact, About)
+│   ├── admin/            # Protected admin dashboard for uploading artwork
+│   └── api/              # API routes for Cloudinary operations
+├── components/           # Reusable UI components
+│   ├── admin/            # Admin-specific components (Uploaders, forms)
+│   ├── animations/       # Framer Motion / GSAP animated wrappers
+│   ├── gallery/          # Grid and painting card components
+│   ├── layout/           # Navbar, Footer
+│   └── three/            # WebGL / R3F Canvas components
+├── lib/                  # Utility functions (cloudinary.ts, paintings.ts, auth.ts)
+└── types/                # TypeScript type definitions (painting.ts)
 ```
 
----
+## Environment Setup
 
-## 🚀 Getting Started
-
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure environment variables
-
-Copy `.env.local.example` to `.env.local` and fill in your values:
+Create a `.env.local` file in the root directory (never commit this file) with the following variables:
 
 ```env
-# MongoDB (local or Atlas)
-MONGODB_URI=mongodb://localhost:27017/artist_portfolio
-
-# NextAuth
+# NextAuth / Session
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
+NEXTAUTH_SECRET=your_generated_secret
 
-# Admin credentials (single-user, stored in ENV)
+# Admin Credentials
 ADMIN_USER=admin
-ADMIN_PASS=your_secure_password
+ADMIN_PASS=change_me
 
-# Cloudinary
+# Cloudinary Portfolio Configuration
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_FOLDER=artist_portfolio
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 
-# Public site URL (used in sitemap + robots)
-NEXT_PUBLIC_SITE_URL=https://anshikaagarwal.com
+# Public site URL
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+> **Note:** Do not expose `CLOUDINARY_API_SECRET` to the frontend via a `NEXT_PUBLIC_` prefix.
 
-### 3. Run the development server
+## Local Development
 
-```bash
-npm run dev
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+3. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Open [http://localhost:3000](http://localhost:3000) to view the site.
+## Admin & Upload Instructions
 
----
+The site includes a secure admin panel for managing the portfolio:
+1. Navigate to `/admin` and log in using the `ADMIN_USER` and `ADMIN_PASS` defined in your `.env.local`.
+2. Click "Upload Artwork" to add a new piece.
+3. The image file will be uploaded to Cloudinary, and the form data (Title, Medium, Description, etc.) will be attached to the image as Cloudinary Context Metadata.
+4. You can edit or delete existing artworks directly from the dashboard.
 
-## 🛠 Tech Stack
+## Contact Section
 
-| Layer | Technology |
-|---|---|
-| Framework | [Next.js 16](https://nextjs.org) (App Router) |
-| UI | [React 19](https://react.dev), [Tailwind CSS v4](https://tailwindcss.com) |
-| Animation | [Framer Motion 12](https://www.framer.com/motion/), [GSAP 3](https://gsap.com) |
-| 3D | [React Three Fiber](https://docs.pmnd.rs/react-three-fiber), [Three.js](https://threejs.org) |
-| Database | [MongoDB](https://mongodb.com) via [Mongoose](https://mongoosejs.com) |
-| Auth | [NextAuth v5](https://authjs.dev) (JWT + Credentials) |
-| Media | [Cloudinary](https://cloudinary.com) |
-| Forms | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) |
-| Icons | [Lucide React](https://lucide.dev) |
-| Fonts | [Playfair Display](https://fonts.google.com/specimen/Playfair+Display), [Inter](https://fonts.google.com/specimen/Inter) (Google Fonts via `next/font`) |
+MongoDB contact message storage has been removed to maintain the stateless architecture. The contact section currently uses direct `mailto:` links and social media integration. 
 
----
+If real contact form submissions are needed later, add a dedicated email provider service such as Resend, EmailJS, Formspree, or standard SMTP. Do not reintroduce a database just for contact messages.
 
-## 🔐 Admin Access
+## Future E-Commerce Note
 
-Navigate to `/admin/login`. Credentials are controlled by the `ADMIN_USER` and `ADMIN_PASS` environment variables. The middleware at `src/middleware.ts` automatically redirects unauthenticated users away from all `/admin/*` routes.
-
----
-
-## 📦 Available Scripts
-
-| Command | Description |
-|---|---|
-| `npm run dev` | Start development server |
-| `npm run build` | Build production bundle |
-| `npm run start` | Run production build locally |
-| `npm run lint` | Run ESLint |
-
----
-
-## 🌐 Deployment
-
-This project is optimised for deployment on [Vercel](https://vercel.com). Set all environment variables in the Vercel dashboard under **Settings → Environment Variables**.
-
-For Cloudinary image domains, the `next.config.ts` already allows `res.cloudinary.com` as a remote image pattern.
-
----
-
-## 🎨 Design System
-
-- **Background**: `#0c0a09` (stone-950)
-- **Text**: `#fafaf9` (stone-50)
-- **Accent palette**: Custom gold scale (`gold-50` → `gold-950`) defined in `globals.css` via `@theme`
-- **Heading font**: Playfair Display (serif)
-- **Body font**: Inter (sans-serif)
-- **Custom scrollbar**, text selection highlight, and no-overflow-x globally applied
-
----
-
-*Designed & built for Anshika Agarwal · Artist & Designer · India*
+Later, if pendant/resin products are added for sale, a real database or e-commerce backend should be added for products, inventory, orders, customers, payments, and shipping. Cloudinary should continue to be used for product images, but not for order or customer data.

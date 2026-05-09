@@ -5,8 +5,11 @@ import { PaintingReveal } from "@/components/animations/PaintingReveal";
 import { MagneticButton } from "@/components/animations/MagneticButton";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { getFeaturedPaintings } from "@/lib/paintings";
 
-export default function Home() {
+export default async function Home() {
+  const featured = await getFeaturedPaintings();
+
   return (
     <PageTransition>
       {/* Hero Section */}
@@ -71,39 +74,33 @@ export default function Home() {
             </p>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 items-end">
-            <div className="md:translate-y-16">
-              <PaintingReveal
-                src="/placeholder-1.png"
-                alt="Hues of Forgetting"
-                width={800}
-                height={1000}
-                className="aspect-[3/4]"
-              />
-              <ScrollReveal delay={0.3} className="mt-6">
-                <h3 className="text-xl font-serif text-[var(--color-gold-100)]">Hues of Forgetting</h3>
-                <p className="text-xs text-[var(--color-gold-500)] tracking-widest uppercase mt-2">
-                  Mixed Media on Canvas · 2025
-                </p>
-              </ScrollReveal>
+          {featured.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 items-end">
+              {featured.map((painting, i) => (
+                <div key={painting.id} className={i === 0 ? "md:translate-y-16" : ""}>
+                  <Link href={`/gallery/${painting.slug}`}>
+                    <PaintingReveal
+                      src={painting.imageUrl}
+                      alt={painting.title}
+                      width={800}
+                      height={1000}
+                      className={i === 0 ? "aspect-[3/4]" : "aspect-[4/5]"}
+                    />
+                  </Link>
+                  <ScrollReveal delay={0.3} className="mt-6">
+                    <h3 className="text-xl font-serif text-[var(--color-gold-100)]">{painting.title}</h3>
+                    <p className="text-xs text-[var(--color-gold-500)] tracking-widest uppercase mt-2">
+                      {painting.medium} · {painting.year}
+                    </p>
+                  </ScrollReveal>
+                </div>
+              ))}
             </div>
-
-            <div>
-              <PaintingReveal
-                src="/placeholder-2.png"
-                alt="The Undone Hour"
-                width={800}
-                height={1000}
-                className="aspect-[4/5]"
-              />
-              <ScrollReveal delay={0.3} className="mt-6">
-                <h3 className="text-xl font-serif text-[var(--color-gold-100)]">The Undone Hour</h3>
-                <p className="text-xs text-[var(--color-gold-500)] tracking-widest uppercase mt-2">
-                  Oil &amp; Gold Leaf · 2026
-                </p>
-              </ScrollReveal>
-            </div>
-          </div>
+          ) : (
+            <p className="text-[var(--color-gold-700)] text-sm text-center py-16 tracking-widest uppercase">
+              No featured works yet — check back soon.
+            </p>
+          )}
 
           <ScrollReveal delay={0.5} className="mt-24 flex justify-center">
             <Link

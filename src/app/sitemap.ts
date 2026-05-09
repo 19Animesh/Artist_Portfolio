@@ -1,17 +1,16 @@
 import { MetadataRoute } from 'next';
-import connectToDatabase from '@/lib/mongodb';
-import Painting from '@/models/Painting';
+import { getPaintings } from '@/lib/paintings';
+import { Painting } from '@/types/painting';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://artistportfolio.com';
 
   // Fetch dynamic routes
-  let paintings = [];
+  let paintings: Painting[] = [];
   try {
-    await connectToDatabase();
-    paintings = await Painting.find({}, { slug: 1, updatedAt: 1 });
-  } catch (error) {
-    console.warn("Could not fetch database for sitemap generation.");
+    paintings = await getPaintings();
+  } catch {
+    console.warn("Could not fetch cloudinary for sitemap generation.");
   }
 
   const paintingUrls = paintings.map((p) => ({

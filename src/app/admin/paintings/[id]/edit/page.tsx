@@ -4,12 +4,14 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { Painting } from "@/types/painting";
 
 export default function EditPaintingPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [painting, setPainting] = useState<any>(null);
+  const [painting, setPainting] = useState<Painting | null>(null);
 
   useEffect(() => {
     fetch(`/api/paintings/${id}`)
@@ -34,7 +36,6 @@ export default function EditPaintingPage({ params }: { params: Promise<{ id: str
         body: JSON.stringify({
           ...data,
           year: Number(data.year),
-          order: Number(data.order),
           isFeatured: data.isFeatured === "on",
         }),
       });
@@ -98,26 +99,22 @@ export default function EditPaintingPage({ params }: { params: Promise<{ id: str
             </div>
             <div className="flex flex-col">
               <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Dimensions</label>
-              <input name="dimensions" defaultValue={painting.dimensions} className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Order priority</label>
-              <input name="order" type="number" defaultValue={painting.order} className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
+              <input name="dimensions" defaultValue={painting.size} className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
             </div>
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Image URL (Cloudinary)</label>
-            <input name="imageSrc" defaultValue={painting.imageSrc} required className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
+          <div className="flex flex-col gap-2">
+            <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)]">Artwork Image</label>
+            <ImageUploader name="imageSrc" defaultValue={painting.imageUrl} required />
           </div>
 
           <div className="flex flex-col">
             <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Description</label>
-            <textarea name="description" defaultValue={painting.description} rows={5} className="bg-transparent border border-[var(--color-gold-900)] p-3 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors rounded" />
+            <textarea name="description" defaultValue={painting.shortDescription} rows={5} className="bg-transparent border border-[var(--color-gold-900)] p-3 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors rounded" />
           </div>
 
           <div className="flex items-center gap-3">
-            <input type="checkbox" name="isFeatured" id="isFeatured" defaultChecked={painting.isFeatured} className="w-4 h-4 accent-[var(--color-gold-400)]" />
+            <input type="checkbox" name="isFeatured" id="isFeatured" defaultChecked={painting.featured} className="w-4 h-4 accent-[var(--color-gold-400)]" />
             <label htmlFor="isFeatured" className="text-sm text-[var(--color-gold-200)]">Feature on Home Page</label>
           </div>
 

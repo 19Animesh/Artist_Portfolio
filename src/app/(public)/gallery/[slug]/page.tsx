@@ -4,18 +4,18 @@ import { PaintingReveal } from "@/components/animations/PaintingReveal";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { MagneticButton } from "@/components/animations/MagneticButton";
+import { getPaintingBySlug } from "@/lib/paintings";
+import { notFound } from "next/navigation";
 
-// Mock data until DB is connected
-const MOCK_PAINTINGS = [
-  { id: "1", title: "Obsidian Dawn", medium: "Mixed Media", year: 2025, desc: "A chaotic yet serene exploration of darkness breaking into light.", imageSrc: "/placeholder-1.png", dimensions: "48x60 in" },
-  { id: "2", title: "Golden Echoes", medium: "Oil & Gold Leaf", year: 2026, desc: "Textures resembling ancient artifacts bathed in modern context.", imageSrc: "/placeholder-2.png", dimensions: "36x48 in" },
-];
+export const dynamic = 'force-dynamic';
 
 export default async function ArtworkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  
-  // Find mock painting or fallback
-  const painting = MOCK_PAINTINGS.find(p => p.id === slug) || MOCK_PAINTINGS[0];
+  const painting = await getPaintingBySlug(slug);
+
+  if (!painting) {
+    notFound();
+  }
 
   return (
     <PageTransition>
@@ -28,12 +28,13 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
               <ArrowLeft size={16} /> Back to Gallery
             </Link>
             <PaintingReveal 
-              src={painting.imageSrc}
+              src={painting.imageUrl}
               alt={painting.title}
               width={1200}
               height={1600}
               priority
-              className="w-full bg-[var(--color-gold-950)]/20"
+              className="w-full h-[60vh] lg:h-[80vh] bg-[var(--color-gold-950)]/20 shadow-2xl shadow-black/50"
+              imageClassName="object-contain"
             />
           </div>
 
@@ -56,14 +57,14 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
                 </div>
                 <div>
                   <h4 className="text-xs tracking-widest text-[var(--color-gold-600)] uppercase mb-1">Dimensions</h4>
-                  <p className="text-[var(--color-gold-200)]">{painting.dimensions}</p>
+                  <p className="text-[var(--color-gold-200)]">{painting.size}</p>
                 </div>
               </div>
             </ScrollReveal>
 
             <ScrollReveal delay={0.4}>
-              <p className="text-[var(--color-gold-300)] leading-relaxed mb-12 font-sans font-light">
-                {painting.desc}
+              <p className="text-[var(--color-gold-300)] leading-relaxed mb-12 font-sans font-light whitespace-pre-wrap">
+                {painting.shortDescription}
               </p>
             </ScrollReveal>
 

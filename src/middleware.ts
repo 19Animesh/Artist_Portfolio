@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-import { auth } from "@/lib/auth"; // You can't import the full auth here due to edge compatibility sometimes, so we configure middleware auth separately or use the auth object.
 
 const { auth: middlewareAuth } = NextAuth({
   providers: [],

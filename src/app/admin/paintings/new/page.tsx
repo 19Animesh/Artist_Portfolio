@@ -4,18 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 export default function NewPaintingPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
-    
+    setError(null);
+
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    
+
+    if (!data.imageSrc) {
+      setError("Please upload an image or paste a Cloudinary URL before saving.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/paintings", {
         method: "POST",
@@ -23,7 +32,6 @@ export default function NewPaintingPage() {
         body: JSON.stringify({
           ...data,
           year: Number(data.year),
-          order: Number(data.order),
           isFeatured: data.isFeatured === "on",
         }),
       });
@@ -32,10 +40,12 @@ export default function NewPaintingPage() {
         router.push("/admin");
         router.refresh();
       } else {
-        console.error("Failed to default create");
+        const json = await res.json();
+        setError(json.error ?? "Failed to save artwork");
       }
     } catch (err) {
       console.error(err);
+      setError("Network error — please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -87,15 +97,14 @@ export default function NewPaintingPage() {
               <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Dimensions</label>
               <input name="dimensions" placeholder="e.g. 48x60 in" className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
             </div>
-            <div className="flex flex-col">
-              <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Order priority</label>
-              <input name="order" type="number" defaultValue="0" className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
-            </div>
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)] mb-2">Image URL (Cloudinary)</label>
-            <input name="imageSrc" required placeholder="https://res.cloudinary.com/..." className="bg-transparent border-b border-[var(--color-gold-900)] py-2 text-[var(--color-gold-100)] focus:outline-none focus:border-[var(--color-gold-400)] transition-colors" />
+          {/* ── Image upload / URL ── */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs uppercase tracking-widest text-[var(--color-gold-500)]">
+              Artwork Image
+            </label>
+            <ImageUploader name="imageSrc" required />
           </div>
 
           <div className="flex flex-col">
@@ -108,13 +117,19 @@ export default function NewPaintingPage() {
             <label htmlFor="isFeatured" className="text-sm text-[var(--color-gold-200)]">Feature on Home Page</label>
           </div>
 
+          {error && (
+            <p className="text-red-400 text-sm border border-red-800 rounded px-3 py-2">
+              {error}
+            </p>
+          )}
+
           <div className="pt-4 border-t border-[var(--color-gold-900)] flex justify-end">
             <button
               type="submit"
               disabled={isSubmitting}
               className="bg-[var(--color-gold-400)] text-[#000] px-8 py-3 rounded text-sm font-bold tracking-widest uppercase hover:bg-[var(--color-gold-300)] transition-colors disabled:opacity-50"
             >
-              {isSubmitting ? "Saving..." : "Save Artwork"}
+              {isSubmitting ? "Saving…" : "Save Artwork"}
             </button>
           </div>
         </form>

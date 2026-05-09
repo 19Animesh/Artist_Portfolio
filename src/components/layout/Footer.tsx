@@ -14,7 +14,16 @@ export function Footer() {
           &copy; {new Date().getFullYear()} Anshika Agarwal. All rights reserved.
         </p>
 
-        <div className="flex gap-6 text-xs tracking-widest uppercase">
+        <div className="flex flex-wrap justify-center gap-6 text-xs tracking-widest uppercase">
+          <Link href="/gallery" className="hover:text-[var(--color-gold-300)] transition-colors">
+            Gallery
+          </Link>
+          <Link href="/about" className="hover:text-[var(--color-gold-300)] transition-colors">
+            About
+          </Link>
+          <Link href="/contact" className="hover:text-[var(--color-gold-300)] transition-colors">
+            Contact
+          </Link>
           <Link
             href="https://instagram.com/anshika.agarwal"
             target="_blank"
@@ -30,12 +39,6 @@ export function Footer() {
             className="hover:text-[var(--color-gold-300)] transition-colors"
           >
             Twitter / X
-          </Link>
-          <Link
-            href="/contact"
-            className="hover:text-[var(--color-gold-300)] transition-colors"
-          >
-            Contact
           </Link>
         </div>
 

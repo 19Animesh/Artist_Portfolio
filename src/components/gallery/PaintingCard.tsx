@@ -8,8 +8,8 @@ import { motion } from "framer-motion";
 interface PaintingCardProps {
   id: string;
   title: string;
-  medium: string;
-  year: number;
+  medium?: string;
+  year?: number;
   imageSrc: string;
 }
 
@@ -23,11 +23,11 @@ export function PaintingCard({ id, title, medium, year, imageSrc }: PaintingCard
       transition={{ duration: 0.6 }}
     >
       <Link href={`/gallery/${id}`}>
-        <div className="overflow-hidden bg-[var(--color-gold-950)]/20 mb-4 h-[600px] relative">
+        <div className="overflow-hidden bg-[var(--color-gold-950)]/20 mb-4 aspect-[4/5] w-full relative">
           <PaintingReveal
             src={imageSrc}
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-full"
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <MagneticButton className="px-6 py-2 border border-[var(--color-gold-300)] text-[var(--color-gold-200)] rounded-full backdrop-blur-sm tracking-widest uppercase text-xs z-20">
