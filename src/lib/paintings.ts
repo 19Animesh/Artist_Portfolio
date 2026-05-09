@@ -45,6 +45,17 @@ function normalizePainting(resource: unknown): Painting {
  */
 export async function getPaintings(): Promise<Painting[]> {
   try {
+    // Debug: log env var presence (not values) to help diagnose production issues
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    if (!cloudName || !apiKey || !apiSecret) {
+      console.error(
+        `[paintings] Missing Cloudinary env vars — CLOUDINARY_CLOUD_NAME=${!!cloudName} CLOUDINARY_API_KEY=${!!apiKey} CLOUDINARY_API_SECRET=${!!apiSecret}`
+      );
+      return [];
+    }
+
     const result = await cloudinary.api.resources({
       type: "upload",
       prefix: `${FOLDER}/`,
@@ -60,7 +71,7 @@ export async function getPaintings(): Promise<Painting[]> {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   } catch (error) {
-    console.error("Error fetching paintings from Cloudinary:", error);
+    console.error("[paintings] Error fetching paintings from Cloudinary:", error);
     return [];
   }
 }
