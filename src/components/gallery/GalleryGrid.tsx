@@ -30,16 +30,16 @@ export function GalleryGrid({ paintings }: GalleryGridProps) {
       
       <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16">
         <AnimatePresence mode="popLayout">
-          {filteredPaintings.map((painting) => (
+          {filteredPaintings.map((painting, i) => (
             <motion.div
               key={painting.id}
               layout
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.4 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              <PaintingCard {...painting} imageSrc={painting.imageUrl} id={painting.slug || painting.id} />
+              <PaintingCard {...painting} imageSrc={painting.imageUrl} id={painting.slug || painting.id} index={i} />
             </motion.div>
           ))}
         </AnimatePresence>
