@@ -3,6 +3,15 @@ import { Painting } from "@/types/painting";
 
 const FOLDER = process.env.CLOUDINARY_FOLDER || "artist_portfolio";
 
+function safeDecode(val: string | undefined): string {
+  if (!val) return "";
+  try {
+    return decodeURIComponent(val);
+  } catch {
+    return val;
+  }
+}
+
 /**
  * Normalizes a Cloudinary resource into a Painting object.
  */
@@ -14,14 +23,14 @@ function normalizePainting(resource: unknown): Painting {
   return {
     id: res.asset_id || res.public_id,
     publicId: res.public_id,
-    slug: context.slug || res.public_id.split("/").pop() || "",
-    title: context.title || "Untitled",
-    shortDescription: context.shortDescription || "",
-    medium: context.medium || "",
-    size: context.size || "",
+    slug: safeDecode(context.slug) || res.public_id.split("/").pop() || "",
+    title: safeDecode(context.title) || "Untitled",
+    shortDescription: safeDecode(context.shortDescription) || "",
+    medium: safeDecode(context.medium) || "",
+    size: safeDecode(context.size) || "",
     year: context.year ? parseInt(context.year, 10) : new Date(res.created_at).getFullYear(),
-    category: context.category || "Uncategorized",
-    status: context.status || "",
+    category: safeDecode(context.category) || "Uncategorized",
+    status: safeDecode(context.status) || "",
     featured: context.featured === "true",
     imageUrl: res.secure_url,
     width: res.width,

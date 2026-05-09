@@ -22,15 +22,22 @@ export async function GET(req: Request) {
 }
 
 function extractPublicId(url: string) {
-  // e.g. https://res.cloudinary.com/demo/image/upload/v12345/artist_portfolio/my-image.jpg
-  // we want artist_portfolio/my-image
   try {
-    const parts = url.split('/');
-    const fileWithExt = parts.pop();
-    const folder = parts.pop();
-    if (!fileWithExt || !folder) return null;
-    const filename = fileWithExt.split('.')[0];
-    return `${folder}/${filename}`;
+    const uploadIndex = url.indexOf('/upload/');
+    if (uploadIndex === -1) return null;
+    
+    let path = url.substring(uploadIndex + 8);
+    
+    if (path.match(/^v\d+\//)) {
+      path = path.replace(/^v\d+\//, '');
+    }
+    
+    const lastDotIndex = path.lastIndexOf('.');
+    if (lastDotIndex !== -1) {
+      path = path.substring(0, lastDotIndex);
+    }
+    
+    return path;
   } catch {
     return null;
   }
